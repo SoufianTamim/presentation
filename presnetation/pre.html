@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Présentation Pro : Valeurs d'Entreprise</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* --- VARIABLES & BASE --- */
+        :root {
+            --primary: #2563eb;       /* Bleu vif */
+            --secondary: #1e293b;     /* Gris sombre */
+            --accent: #f59e0b;        /* Orange/Or */
+            --bg-grad: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            --glass: rgba(255, 255, 255, 0.85);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: #cbd5e1;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        /* --- LE CONTENEUR GÉANT (SCÈNE) --- */
+        .stage {
+            /* Plus grand : 85% de la largeur, format 16/9 */
+            width: 85vw;
+            max-width: 1300px;
+            aspect-ratio: 16/9;
+            max-height: 90vh;
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.25), 
+                0 0 0 1px rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+        }
+
+        /* --- BARRE DE PROGRESSION --- */
+        .progress-bar-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.05);
+            z-index: 100;
+        }
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* --- SLIDES --- */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 6vw; /* Padding responsive */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
+        }
+
+        /* --- ANIMATIONS INTERNES (C'est ici la magie) --- */
+        /* Tous les éléments avec la classe .anim-up commencent invisibles et plus bas */
+        .anim-up {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: all 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        /* Quand la slide est active, ils remontent et apparaissent */
+        .slide.active .anim-up {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Délais en cascade (Stagger effect) */
+        .slide.active .d-1 { transition-delay: 0.1s; }
+        .slide.active .d-2 { transition-delay: 0.2s; }
+        .slide.active .d-3 { transition-delay: 0.3s; }
+        .slide.active .d-4 { transition-delay: 0.4s; }
+        .slide.active .d-5 { transition-delay: 0.5s; }
+
+        /* --- TYPOGRAPHIE --- */
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 800;
+            font-size: 4rem; /* Très gros titre */
+            color: var(--secondary);
+            line-height: 1.1;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 30px;
+        }
+
+        h3 {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 1.2rem;
+            color: #475569;
+            line-height: 1.7;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+
+        /* --- COMPOSANTS DE CONTENU --- */
+        
+        /* Grid pour les cartes */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: #f8fafc;
+            padding: 30px;
+            border-left: 5px solid var(--primary);
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, var(--primary) 0%, #1e40af 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 20px 25px -5px rgba(37, 99, 235, 0.3);
+        }
+        .highlight-box p { color: #e2e8f0; }
+
+        /* Liste stylisée */
+        ul.check-list { list-style: none; }
+        ul.check-list li {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            padding-left: 35px;
+            position: relative;
+        }
+        ul.check-list li::before {
+            content: '✔';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: bold;
+        }
+
+        /* --- DÉCORATIONS D'ARRIÈRE-PLAN ANIMÉES --- */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: 0;
+            animation: float 10s infinite ease-in-out;
+        }
+        .blob-1 { width: 400px; height: 400px; background: rgba(37, 99, 235, 0.1); top: -100px; right: -100px; }
+        .blob-2 { width: 300px; height: 300px; background: rgba(245, 158, 11, 0.15); bottom: -50px; left: -50px; animation-delay: -5s; }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(20px, 40px); }
+        }
+
+        /* --- CONTROLS --- */
+        .controls {
+            position: absolute;
+            bottom: 40px;
+            right: 60px;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-nav {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 2px solid #e2e8f0;
+            background: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--secondary);
+        }
+
+        .btn-nav:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        
+        .slide-counter {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #94a3b8;
+            font-size: 1.2rem;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="stage">
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+
+        <div class="slide active">
+            <h3 class="anim-up d-1" style="color: var(--accent); text-transform: uppercase; letter-spacing: 3px;">Présentation Stratégique</h3>
+            <h1 class="anim-up d-2">LES VALEURS<br><span style="color: var(--primary);">PROFESSIONNELLES</span></h1>
+            <p class="anim-up d-3" style="font-size: 1.5rem;">Pourquoi sont-elles le pilier invisible de la réussite d'une entreprise ?</p>
+            <div class="anim-up d-4" style="margin-top: 40px;">
+                <span style="background: var(--secondary); color: white; padding: 10px 20px; border-radius: 50px; font-size: 0.9rem;">Par [Votre Nom]</span>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="anim-up d-1">Une Boussole Morale</h2>
+            <p class="anim-up d-2">Les valeurs professionnelles ne sont pas juste des mots affichés dans un hall d'entrée. Elles constituent l'ADN profond de l'organisation.</p>
+            
+            <div class="cards-grid">
+                <div class="card anim-up d-3">
+                    <h3>Croyances</h3>
+                    <p style="font-size: 0.9rem; margin:0;">Ce que l'entreprise considère comme vrai et juste.</p>
+                </div>
+                <div class="card anim-up d-4">
+                    <h3>Normes</h3>
+                    <p style="font-size: 0.9rem; margin:0;">Les règles non-écrites qui dictent le comportement.</p>
+                </div>
+                <div class="card anim-up d-5" style="border-left-color: var(--accent);">
+                    <h3>Attentes</h3>
+                    <p style="font-size: 0.9rem; margin:0;">Ce que les clients et employés peuvent attendre de nous.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="anim-up d-1">Exemples de Valeurs Fortes</h2>
+            <p class="anim-up d-2">Chaque entreprise possède un mix unique.</p>
+            
+            <div style="display: flex; gap: 40px; margin-top: 20px;">
+                <div class="anim-up d-3" style="flex: 1;">
+                    <h3 style="color: var(--primary);">1. L'Intégrité</h3>
+                    <p>Agir avec honnêteté, même quand personne ne regarde. C'est la base de la confiance.</p>
+                </div>
+                <div class="anim-up d-4" style="flex: 1;">
+                    <h3 style="color: var(--primary);">2. L'Innovation</h3>
+                    <p>Refuser le statu quo. Chercher constamment à améliorer les produits et processus.</p>
+                </div>
+            </div>
+            <div style="display: flex; gap: 40px; margin-top: 20px;">
+                <div class="anim-up d-5" style="flex: 1;">
+                    <h3 style="color: var(--primary);">3. L'Esprit d'Équipe</h3>
+                    <p>"Seul on va plus vite, ensemble on va plus loin." La collaboration avant la compétition interne.</p>
+                </div>
+                <div class="anim-up d-5" style="flex: 1;">
+                    <h3 style="color: var(--primary);">4. L'Excellence</h3>
+                    <p>Ne pas se contenter du "moyen". Viser la plus haute qualité possible.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="anim-up d-1">Rôle Interne : La Cohésion</h2>
+            <div style="display: flex; align-items: center; gap: 50px;">
+                <div style="flex: 1;">
+                    <ul class="check-list">
+                        <li class="anim-up d-2">Facilite la prise de décision rapide.</li>
+                        <li class="anim-up d-3">Réduit les conflits (référentiel commun).</li>
+                        <li class="anim-up d-4">Attire les bons talents (Recrutement).</li>
+                        <li class="anim-up d-5">Augmente l'engagement des employés.</li>
+                    </ul>
+                </div>
+                <div class="highlight-box anim-up d-3" style="flex: 1; margin-top: 0;">
+                    <h3>Le saviez-vous ?</h3>
+                    <p>Les employés dont les valeurs personnelles s'alignent avec celles de leur entreprise sont <strong>3 fois plus susceptibles</strong> de rester à long terme.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <h2 class="anim-up d-1">Rôle Externe : L'Image de Marque</h2>
+            <p class="anim-up d-2">Aujourd'hui, les consommateurs achètent le "Pourquoi" autant que le "Quoi".</p>
+            
+            <div class="anim-up d-3" style="background: white; border: 1px solid #e2e8f0; padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                <div style="font-size: 3rem; color: var(--accent);">★</div>
+                <div>
+                    <h3>Différenciation Concurrentielle</h3>
+                    <p style="margin:0;">Dans un marché saturé, vos valeurs sont votre signature unique. Elles créent une connexion émotionnelle avec le client.</p>
+                </div>
+            </div>
+            
+            <div class="anim-up d-4" style="margin-top: 20px; background: white; border: 1px solid #e2e8f0; padding: 30px; border-radius: 12px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);">
+                <div style="font-size: 3rem; color: var(--primary);">♥</div>
+                <div>
+                    <h3>Fidélisation</h3>
+                    <p style="margin:0;">Un client qui partage vos valeurs pardonnera plus facilement une erreur et deviendra un ambassadeur.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="slide">
+            <div style="text-align: center; width: 100%;">
+                <h2 class="anim-up d-1" style="font-size: 3rem; margin-bottom: 20px;">En Résumé</h2>
+                <p class="anim-up d-2" style="font-size: 1.5rem; max-width: 900px; margin: 0 auto 40px auto;">
+                    Les valeurs ne sont pas une option, c'est une <strong>nécessité stratégique</strong>.
+                </p>
+                
+                <div class="anim-up d-3" style="display: inline-flex; gap: 20px;">
+                    <div style="text-align: left; padding: 20px; background: #fff; border-radius: 10px;">
+                        <strong>1. Définir</strong><br>Clarifier l'identité.
+                    </div>
+                    <div style="text-align: left; padding: 20px; background: #fff; border-radius: 10px;">
+                        <strong>2. Incarner</strong><br>L'exemple vient d'en haut.
+                    </div>
+                    <div style="text-align: left; padding: 20px; background: #fff; border-radius: 10px;">
+                        <strong>3. Célébrer</strong><br>Récompenser les bons comportements.
+                    </div>
+                </div>
+
+                <div class="anim-up d-5" style="margin-top: 60px;">
+                    <button style="padding: 15px 40px; background: var(--primary); color: white; border: none; font-size: 1.2rem; border-radius: 8px; cursor: pointer; box-shadow: 0 10px 20px rgba(37, 99, 235, 0.4);">
+                        Merci de votre attention
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <span class="slide-counter" id="counter">01 / 06</span>
+            <button class="btn-nav" id="prevBtn" onclick="changeSlide(-1)">&#8592;</button>
+            <button class="btn-nav" id="nextBtn" onclick="changeSlide(1)">&#8594;</button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const counter = document.getElementById('counter');
+        const totalSlides = slides.length;
+
+        function updateUI() {
+            // Mise à jour de la barre de progression
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            // Mise à jour du compteur
+            counter.innerText = `0${currentSlide + 1} / 0${totalSlides}`;
+
+            // Désactivation visuelle des boutons aux extrémités (optionnel)
+            document.getElementById('prevBtn').style.opacity = currentSlide === 0 ? '0.3' : '1';
+            document.getElementById('prevBtn').style.pointerEvents = currentSlide === 0 ? 'none' : 'all';
+            
+            document.getElementById('nextBtn').style.opacity = currentSlide === totalSlides - 1 ? '0.3' : '1';
+        }
+
+        function changeSlide(direction) {
+            // Retire la classe active de la slide actuelle
+            slides[currentSlide].classList.remove('active');
+
+            // Calcul du nouvel index
+            currentSlide += direction;
+
+            // Boucler ou bloquer ? Ici on bloque aux extrémités
+            if (currentSlide < 0) currentSlide = 0;
+            if (currentSlide >= totalSlides) currentSlide = totalSlides - 1;
+
+            // Ajoute la classe active à la nouvelle slide
+            // Petit délai pour laisser l'ancienne disparaître proprement si on voulait du fade out, 
+            // mais ici on change direct pour que l'animation d'entrée se joue
+            slides[currentSlide].classList.add('active');
+
+            updateUI();
+        }
+
+        // Navigation au clavier
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight') changeSlide(1);
+            if (e.key === 'ArrowLeft') changeSlide(-1);
+        });
+
+        // Init
+        updateUI();
+    </script>
+</body>
+</html>
